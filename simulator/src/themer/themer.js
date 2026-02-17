@@ -13,7 +13,9 @@ const getCanvasColors = () => {
   colors["fill"] = getComputedStyle(document.documentElement).getPropertyValue('--fill');
   colors["mini_fill"] = getComputedStyle(document.documentElement).getPropertyValue('--mini-map');
   colors["mini_stroke"] = getComputedStyle(document.documentElement).getPropertyValue('--mini-map-stroke');
-  colors["stroke"] = getComputedStyle(document.documentElement).getPropertyValue('--stroke');
+  colors["stroke"] = getComputedStyle(document.documentElement)
+  .getPropertyValue('--stroke')
+  .trim();
   colors["stroke_alt"] = getComputedStyle(document.documentElement).getPropertyValue('--secondary-stroke');
   colors["input_text"] = getComputedStyle(document.documentElement).getPropertyValue('--input-text');
   colors["color_wire_draw"] = getComputedStyle(document.documentElement).getPropertyValue('--wire-draw');
@@ -44,13 +46,32 @@ export let colors = getCanvasColors();
  */
 function updateThemeForStyle(themeName) {
     const selectedTheme = themeOptions[themeName];
-    if(selectedTheme === undefined) return;
+    if (selectedTheme === undefined) return;
+
     const html = document.getElementsByTagName('html')[0];
-    Object.keys(selectedTheme).forEach((property, i) => {
+
+    Object.keys(selectedTheme).forEach((property) => {
         html.style.setProperty(property, selectedTheme[property]);
     });
+
+    // Refresh canvas color object
     colors = getCanvasColors();
+
+    // Force simulator redraw
+    if (window.globalScope && typeof window.globalScope.update === "function") {
+        window.globalScope.update();
+    }
+
+    // Update canvas background
+    const canvas = document.querySelector('canvas');
+    if (canvas) {
+        const bg = getComputedStyle(document.documentElement)
+            .getPropertyValue('--canvas-fill')
+            .trim();
+        canvas.style.background = bg;
+    }
 }
+
 
 export default updateThemeForStyle;
 
